@@ -1,0 +1,33 @@
+{
+  "name": "@borellion/threlte-sdk",
+  "version": "4.0.0",
+  "description": "Threlte SDK for Borellion Banner integration.",
+  "main": "dist/borellion-threlte-sdk.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "build-dev": "vite build --mode development"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/borellion/sdk.git",
+    "directory": "threlte"
+  },
+  "author": "Borellion",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "@threlte/core": "^8.0.0",
+    "svelte": "^4.0.0",
+    "three": "^0.151.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "svelte": "^4.0.0",
+    "vite": "^5.0.0"
+  }
+}
