@@ -23,7 +23,7 @@
   export let modalBackground = false;
   export let modalDelay = 0;
 
-  const { renderer, scene } = useThrelte();
+  const { renderer, scene, camera } = useThrelte();
 
   let material = new THREE.MeshBasicMaterial();
   let bannerData = null;
@@ -63,7 +63,7 @@
     if (!meshRef) return;
     const cam = renderer.xr.isPresenting
       ? renderer.xr.getCamera()
-      : scene.getObjectByProperty('isCamera', true);
+      : camera.current;
     meshRef.geometry.computeBoundingBox();
     const bb = new THREE.Box3().setFromObject(meshRef);
     const isVisible = visibilityCheck(
