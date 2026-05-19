@@ -1,0 +1,203 @@
+# Borellion SDK
+
+Borellion lets developers monetize 3D and WebXR experiences with in-scene banner ads. Banners are rendered as textured meshes inside the 3D scene — not as HTML overlays.
+
+Docs: https://www.borellion.com/docs/guides/developers/integrate
+Dashboard: https://app.borellion.com
+Support: elijah@borellion.com
+
+## Key Concepts
+
+- **Ad Unit ID**: A UUID identifying the ad placement. Created in the Borellion Dashboard. Use `YOUR_AD_UNIT_ID` as a placeholder until the developer provides the real value.
+- **Format**: The aspect ratio of the banner. Options: `billboard` (970×250), `medium-rectangle` (300×250), `mobile-phone-interstitial` (750×1334).
+- **Debug mode**: Append `?debug=true` to the URL to load sample ads locally. Real ads only serve in production.
+- **Beacon**: Analytics for the ad unit (impressions and clicks). Enabled by default. Set `beacon: false` to opt out.
+- **Prebid**: Programmatic demand via Prebid/Aditude. Enabled by default. Set `prebid: false` to fetch ads directly from Borellion's ad server.
+
+## Packages
+
+| Framework | Package | Install |
+|-----------|---------|---------|
+| A-Frame | `@borellion/aframe-sdk` | `npm i @borellion/aframe-sdk` |
+| Babylon.js | `@borellion/babylonjs-sdk` | `npm i @borellion/babylonjs-sdk` |
+| PlayCanvas | `@borellion/playcanvas-sdk` | `npm i @borellion/playcanvas-sdk` |
+| React Three Fiber | `@borellion/r3f-sdk` | `npm i @borellion/r3f-sdk` |
+| Three.js | `@borellion/threejs-sdk` | `npm i @borellion/threejs-sdk` |
+| Web Components | `@borellion/web-sdk` | `npm i @borellion/web-sdk` |
+| Wonderland Engine | `@borellion/wonderland-sdk` | `npm i @borellion/wonderland-sdk` |
+| Unity | `com.borellion.unity-sdk` | UPM git URL |
+
+CDN base: `https://cdn.borellion.com/sdk/`
+
+---
+
+## A-Frame
+
+```sh
+npm install @borellion/aframe-sdk
+```
+
+```html
+<!-- CDN -->
+<script src="https://cdn.borellion.com/sdk/borellion-aframe-sdk.js"></script>
+
+<!-- In <a-scene> -->
+<a-entity
+  borellion="adUnit: YOUR_AD_UNIT_ID; format: medium-rectangle;"
+  position="0 2 0">
+</a-entity>
+```
+
+Component attributes: `adUnit` (string, required), `format` (string, required), `height` (float, default 1), `beacon` (bool, default true), `prebid` (bool, default true).
+
+---
+
+## Babylon.js
+
+```sh
+npm install @borellion/babylonjs-sdk
+```
+
+```js
+import Borellion from '@borellion/babylonjs-sdk';
+
+// new Borellion(adUnit, format, style, height, scene, xrHelper?, beacon?, prebid?)
+const banner = new Borellion('YOUR_AD_UNIT_ID', 'medium-rectangle', 'standard', 3, scene);
+```
+
+Parameters: `adUnit` (string), `format` (string), `style` ('standard'|'minimal'|'transparent'), `height` (number), `scene` (BABYLON.Scene), `webXRExperienceHelper` (optional), `beacon` (bool, default true), `prebid` (bool, default true).
+
+---
+
+## PlayCanvas
+
+```sh
+npm install @borellion/playcanvas-sdk
+```
+
+```js
+import Borellion from '@borellion/playcanvas-sdk';
+
+const banner = new pc.Entity();
+banner.addComponent('script');
+banner.script.create('borellion');
+banner.script['borellion'].adUnitId = 'YOUR_AD_UNIT_ID';
+banner.script['borellion'].format = 1; // 1=Medium Rectangle, 2=Billboard, 3=Mobile Phone Interstitial
+banner.script['borellion'].cameraEntity = camera;
+app.root.addChild(banner);
+```
+
+Editor variant CDN: `https://cdn.borellion.com/sdk/borellion-playcanvas-sdk-editor.js`
+
+Properties: `adUnitId` (string, required), `format` (enum: 1/2/3), `cameraEntity` (Entity, required), `prebid` (bool, default true).
+
+---
+
+## React Three Fiber
+
+```sh
+npm install @borellion/r3f-sdk
+```
+
+```jsx
+import { Borellion } from '@borellion/r3f-sdk';
+// For WebXR: import { BorellionXR } from '@borellion/r3f-sdk/xr';
+
+<Borellion
+  adUnit="YOUR_AD_UNIT_ID"
+  format="medium-rectangle"
+  position={[0, 2, -3]}
+/>
+```
+
+Props: `adUnit` (string, required), `format` (string, required), `position` (array, default [0,0,0]), `height` (number, default 1), `beacon` (bool, default true), `prebid` (bool, default true).
+
+---
+
+## Three.js
+
+```sh
+npm install @borellion/threejs-sdk
+```
+
+```js
+import Borellion from '@borellion/threejs-sdk';
+
+// new Borellion(adUnit, format, style, height, renderer?, beacon?, prebid?)
+const banner = new Borellion('YOUR_AD_UNIT_ID', 'medium-rectangle', 'standard', 3);
+scene.add(banner);
+```
+
+Parameters: `adUnit` (string), `format` (string), `style` ('standard'|'minimal'|'transparent'), `height` (number), `renderer` (WebGLRenderer, optional — required for WebXR), `beacon` (bool, default true), `prebid` (bool, default true).
+
+---
+
+## Web Components
+
+```sh
+npm install @borellion/web-sdk
+```
+
+```html
+<script src="https://cdn.borellion.com/sdk/borellion-web-sdk.js"></script>
+
+<borellion-ad
+  ad-unit="YOUR_AD_UNIT_ID"
+  format="medium-rectangle"
+  width="300px">
+</borellion-ad>
+```
+
+Attributes: `ad-unit` (string, required), `format` (string, required), `width` (CSS string, optional).
+
+---
+
+## Wonderland Engine
+
+```sh
+npm install @borellion/wonderland-sdk
+```
+
+```js
+import { Borellion } from '@borellion/wonderland-sdk';
+
+// Register before engine starts loading the scene
+engine.registerComponent(Borellion);
+
+// Add to a mesh object programmatically
+const bannerObject = engine.scene.addObject();
+bannerObject.addComponent(Borellion, {
+  adUnit: 'YOUR_AD_UNIT_ID',
+  format: 5, // 5=medium-rectangle
+});
+// Or add the 'borellion' component in the Wonderland Editor UI
+```
+
+Format enum: 0=tall, 1=wide, 2=square, 3=mobile-phone-interstitial, 4=billboard, 5=medium-rectangle.
+
+The object must have a `mesh` component. `cursor-target` and `collision` are created automatically if absent. A cursor must be set up in the scene for click interactions.
+
+Properties: `adUnit` (string), `format` (enum, default square), `style` ('standard'|'minimal'|'transparent', default transparent), `scaleToRatio` (bool, default true), `textureProperty` (string, default 'auto'), `beacon` (bool, default true), `prebid` (bool, default true), `customDefaultImage` (string), `customDefaultCtaUrl` (string), `modalTrigger` (string), `modalBackground` (bool, default false), `modalDelay` (float, default 0).
+
+---
+
+## Unity
+
+Install via Unity Package Manager using the git URL: `https://github.com/borellion/sdk`
+
+1. Add the **BorellionSDK** prefab to the scene hierarchy
+2. Add the **Banner** prefab to the scene
+3. Set **Ad Unit ID** and **Format** in the Inspector
+4. **Beacon Enabled** (default true) — analytics
+5. **Prebid Enabled** (default true) — programmatic demand
+
+---
+
+## Common Mistakes
+
+- Do not use `@zestyxyz/` package names — these are the old names. All packages are now under `@borellion/`.
+- The A-Frame component attribute is `borellion`, not `borellion-banner` or `zesty-banner`.
+- The PlayCanvas script name is `'borellion'`, not `'borellion-banner'`.
+- The Wonderland component TypeName is `'borellion'`.
+- `format` values differ between frameworks: A-Frame/Three.js/Babylon/R3F use string names; PlayCanvas uses integers 1/2/3; Wonderland uses integers 0–5.
+- For WebXR in Three.js, pass the `WebGLRenderer` as the fifth argument. For Babylon.js, pass the `WebXRExperienceHelper` as the sixth argument.
