@@ -8,8 +8,7 @@ const BEACON_GRAPHQL_URI = 'https://beacon2.zesty.market/zgraphql'
 const DEFAULT_CTA_URL = 'https://relay.borellion.com/';
 const DEFAULT_CAMPAIGN_ID = 'DefaultCampaign';
 
-const DB_ENDPOINT = 'https://api.zesty.market/api';
-const STAGING_DB_ENDPOINT = 'https://api-staging.zesty.market/api';
+const DB_ENDPOINT = 'https://api.borellion.com/api';
 
 // Prebid variables
 const AD_REFRESH_INTERVAL = 30000;
