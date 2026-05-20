@@ -157,8 +157,7 @@ const getDefaultBanner = (format, style = 'standard', shouldOverride = false, ov
 }
 
 const getSampleBanner = (format) => {
-  const ENDPOINT = isStaging ? STAGING_DB_ENDPOINT : DB_ENDPOINT;
-  return { Ads: [{ asset_url: `${ENDPOINT}/ad/sample?format=${format}&timestamp=${Date.now()}`, cta_url: DEFAULT_CTA_URL }], CampaignId: DEFAULT_CAMPAIGN_ID }
+  return { Ads: [{ asset_url: `${DB_ENDPOINT}/ad/sample?format=${format}&timestamp=${Date.now()}`, cta_url: DEFAULT_CTA_URL }], CampaignId: DEFAULT_CAMPAIGN_ID }
 }
 
 const fetchFromZestyAPI = async (adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage = null, customDefaultCtaUrl = null) => {
