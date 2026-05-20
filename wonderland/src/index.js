@@ -38,7 +38,7 @@ export class Borellion extends Component {
     /* Your banner ad unit ID */
     adUnit: Property.string(''),
     /* The default banner format, determines aspect ratio */
-    format: Property.enum(['tall', 'wide', 'square', 'mobile-phone-interstitial', 'billboard', 'medium-rectangle'], 'square'),
+    format: Property.enum(['mobile-phone-interstitial', 'billboard', 'medium-rectangle'], 'medium-rectangle'),
     /* The default banner visual style */
     style: Property.enum(['standard', 'minimal', 'transparent'], 'transparent'),
     /* Scale width of the object to banner ratio (see format) and set the collider */

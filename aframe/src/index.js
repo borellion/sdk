@@ -1,7 +1,15 @@
 /* global AFRAME */
 
 import { fetchCampaignAd, sendOnLoadMetric, sendOnClickMetric, analyticsSession, AD_REFRESH_INTERVAL } from '../../utils/networking';
-import { formats, defaultFormat, defaultStyle } from '../../utils/formats';
+import { formats as sharedFormats, defaultFormat, defaultStyle } from '../../utils/formats';
+
+const assetsURL = 'https://cdn.borellion.com/sdk/assets';
+const legacyFormats = {
+  'tall':   { width: 0.75, height: 1, style: { standard: `${assetsURL}/zesty-banner-tall.png`,   minimal: `${assetsURL}/zesty-banner-tall-minimal.png`,   transparent: `${assetsURL}/zesty-banner-tall-transparent.png`   } },
+  'wide':   { width: 4,    height: 1, style: { standard: `${assetsURL}/zesty-banner-wide.png`,   minimal: `${assetsURL}/zesty-banner-wide-minimal.png`,   transparent: `${assetsURL}/zesty-banner-wide-transparent.png`   } },
+  'square': { width: 1,    height: 1, style: { standard: `${assetsURL}/zesty-banner-square.png`, minimal: `${assetsURL}/zesty-banner-square-minimal.png`, transparent: `${assetsURL}/zesty-banner-square-transparent.png` } },
+};
+const formats = { ...legacyFormats, ...sharedFormats };
 import { openURL, visibilityCheck, constructAdModal } from '../../utils/helpers';
 import pkg from '../package.json';
 const { version } = pkg;
@@ -41,7 +49,7 @@ AFRAME.registerComponent('borellion', {
   data: {},
   schema: {
     adUnit: { type: 'string' },
-    format: { type: 'string', oneOf: ['tall', 'wide', 'square'] },
+    format: { type: 'string', oneOf: ['tall', 'wide', 'square', 'billboard', 'medium-rectangle', 'mobile-phone-interstitial'] },
     style: { type: 'string', default: defaultStyle, oneOf: ['standard', 'minimal'] },
     height: { type: 'float', default: 1 },
     beacon: { type: 'boolean', default: true },
