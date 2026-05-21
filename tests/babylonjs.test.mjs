@@ -37,7 +37,7 @@ test.describe('Default banners', () => {
     const banner1 = await page.evaluate(
       () => window.scene.meshes[4].material.diffuseTexture.name
     );
-    expect(banner1.split('/').pop()).toBe('zesty-default-medium-rectangle.png');
+    expect(banner1.split('/').pop()).toBe('borellion-default-medium-rectangle.jpg');
   });
 
   test('The billboard banner is present', async ({ page }) => {
@@ -45,7 +45,7 @@ test.describe('Default banners', () => {
     const banner2 = await page.evaluate(
       () => window.scene.meshes[5].material.diffuseTexture.name
     );
-    expect(banner2.split('/').pop()).toBe('zesty-default-billboard.png');
+    expect(banner2.split('/').pop()).toBe('borellion-default-billboard.jpg');
   });
 
   test('The mobile-phone-interstitial banner is present', async ({ page }) => {
@@ -53,7 +53,7 @@ test.describe('Default banners', () => {
     const banner3 = await page.evaluate(
       () => window.scene.meshes[6].material.diffuseTexture.name
     );
-    expect(banner3.split('/').pop()).toBe('zesty-default-mobile-phone-interstitial.png');
+    expect(banner3.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
   });
 });
 

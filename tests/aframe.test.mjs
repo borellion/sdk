@@ -72,7 +72,7 @@ test.describe('Default banners', () => {
       try { img = await banner.evaluate(srcEvaluate); } catch (e) {}
       if (!img) await page.waitForTimeout(100);
     }
-    expect(img.split('/').pop()).toBe('zesty-default-billboard.png');
+    expect(img.split('/').pop()).toBe('borellion-default-billboard.jpg');
   });
 
   test('The mobile-phone-interstitial banner is displaying the correct default image', async ({ page }) => {
@@ -82,7 +82,7 @@ test.describe('Default banners', () => {
       try { img = await banner.evaluate(srcEvaluate); } catch (e) {}
       if (!img) await page.waitForTimeout(100);
     }
-    expect(img.split('/').pop()).toBe('zesty-default-mobile-phone-interstitial.png');
+    expect(img.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
   });
 });
 

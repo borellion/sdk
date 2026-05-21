@@ -31,7 +31,7 @@ test.describe('Default banners', () => {
     const banner1 = await page.evaluate(
       () => document.getElementById('banner1').shadowRoot.children[0].src
     );
-    expect(banner1.split('/').pop()).toBe('zesty-default-medium-rectangle.png');
+    expect(banner1.split('/').pop()).toBe('borellion-default-medium-rectangle.jpg');
   });
 
   test('The billboard banner is displaying the correct default image', async ({ page }) => {
@@ -39,7 +39,7 @@ test.describe('Default banners', () => {
     const banner2 = await page.evaluate(
       () => document.getElementById('banner2').shadowRoot.children[0].src
     );
-    expect(banner2.split('/').pop()).toBe('zesty-default-billboard.png');
+    expect(banner2.split('/').pop()).toBe('borellion-default-billboard.jpg');
   });
 
   test('The mobile-phone-interstitial banner is displaying the correct default image', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('Default banners', () => {
     const banner3 = await page.evaluate(
       () => document.getElementById('banner3').shadowRoot.children[0].src
     );
-    expect(banner3.split('/').pop()).toBe('zesty-default-mobile-phone-interstitial.png');
+    expect(banner3.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
   });
 });
 

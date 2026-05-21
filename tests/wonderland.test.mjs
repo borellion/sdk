@@ -42,13 +42,13 @@ test.describe('Default banners @skip', () => {
   test('The billboard banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.testBanners[1].banner != null);
     const banner2 = await page.evaluate(() => window.testBanners[1].banner.imageSrc);
-    expect(banner2.split('/').pop()).toBe('zesty-default-billboard.png');
+    expect(banner2.split('/').pop()).toBe('borellion-default-billboard.jpg');
   });
 
   test('The mobile-phone-interstitial banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.testBanners[2].banner != null);
     const banner3 = await page.evaluate(() => window.testBanners[2].banner.imageSrc);
-    expect(banner3.split('/').pop()).toBe('zesty-default-mobile-phone-interstitial.png');
+    expect(banner3.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
   });
 });
 

@@ -43,13 +43,13 @@ test.describe('Default banners', () => {
   test('The billboard banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.banner2?.findComponent('render').meshInstances[0]?._material._diffuseMap?.name != null);
     const banner2 = await page.evaluate(() => window.banner2.findComponent('render')?.meshInstances[0]._material._diffuseMap.name);
-    expect(banner2.split('/').pop()).toBe('zesty-default-billboard.png');
+    expect(banner2.split('/').pop()).toBe('borellion-default-billboard.jpg');
   });
 
   test('The mobile-phone-interstitial banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.banner3?.findComponent('render').meshInstances[0]?._material._diffuseMap?.name != null);
     const banner3 = await page.evaluate(() => window.banner3.findComponent('render').meshInstances[0]._material._diffuseMap.name);
-    expect(banner3.split('/').pop()).toBe('zesty-default-mobile-phone-interstitial.png');
+    expect(banner3.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
   });
 });
 
