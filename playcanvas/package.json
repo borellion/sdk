@@ -1,6 +1,6 @@
 {
   "name": "@borellion/playcanvas-sdk",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "PlayCanvas SDK for Borellion Banner integration.",
   "main": "dist/borellion-playcanvas-sdk.js",
   "exports": {
