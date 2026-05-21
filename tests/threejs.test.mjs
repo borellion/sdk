@@ -34,19 +34,19 @@ test.describe('Default banners', () => {
   test('The medium-rectangle banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.scene?.children[1]?.banner?.src != null);
     const banner1 = await page.evaluate(() => window.scene.children[1].banner.src);
-    expect(banner1.split('/').pop()).toBe('zesty-default-medium-rectangle.png');
+    expect(banner1.split('/').pop()).toBe('borellion-default-medium-rectangle.jpg');
   });
 
   test('The billboard banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.scene?.children[2]?.banner?.src != null);
     const banner2 = await page.evaluate(() => window.scene.children[2].banner.src);
-    expect(banner2.split('/').pop()).toBe('zesty-default-billboard.png');
+    expect(banner2.split('/').pop()).toBe('borellion-default-billboard.jpg');
   });
 
   test('The mobile-phone-interstitial banner is present', async ({ page }) => {
     await page.waitForFunction(() => window.scene?.children[3]?.banner?.src != null);
     const banner3 = await page.evaluate(() => window.scene.children[3].banner.src);
-    expect(banner3.split('/').pop()).toBe('zesty-default-mobile-phone-interstitial.png');
+    expect(banner3.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
   });
 });
 

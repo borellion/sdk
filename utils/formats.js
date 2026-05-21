@@ -6,8 +6,8 @@ const formats = {
         height: 1,
         style: {
             'standard': `${assetsURL}/zesty-banner-tall.png`,
-            'minimal': `${assetsURL}/zesty-banner-tall-minimal.png`,
-            'transparent': `${assetsURL}/zesty-banner-tall-transparent.png`
+            'minimal': `${assetsURL}/zesty-banner-tall.png`,
+            'transparent': `${assetsURL}/zesty-banner-tall.png`
         }
     },
     'wide': {
@@ -15,8 +15,8 @@ const formats = {
         height: 1,
         style: {
             'standard': `${assetsURL}/zesty-banner-wide.png`,
-            'minimal': `${assetsURL}/zesty-banner-wide-minimal.png`,
-            'transparent': `${assetsURL}/zesty-banner-wide-transparent.png`
+            'minimal': `${assetsURL}/zesty-banner-wide.png`,
+            'transparent': `${assetsURL}/zesty-banner-wide.png`
         }
     },
     'square': {
@@ -24,35 +24,35 @@ const formats = {
         height: 1,
         style: {
             'standard': `${assetsURL}/zesty-banner-square.png`,
-            'minimal': `${assetsURL}/zesty-banner-square-minimal.png`,
-            'transparent': `${assetsURL}/zesty-banner-square-transparent.png`
+            'minimal': `${assetsURL}/zesty-banner-square.png`,
+            'transparent': `${assetsURL}/zesty-banner-square.png`
         }
     },
     'mobile-phone-interstitial': {
         width: 0.56,
         height: 1,
         style: {
-            'standard': `${assetsURL}/zesty-default-mobile-phone-interstitial.png`,
-            'minimal': `${assetsURL}/zesty-default-mobile-phone-interstitial.png`,
-            'transparent': `${assetsURL}/zesty-default-mobile-phone-interstitial.png`
+            'standard': `${assetsURL}/borellion-default-mobile-phone-interstitial.jpg`,
+            'minimal': `${assetsURL}/borellion-default-mobile-phone-interstitial.jpg`,
+            'transparent': `${assetsURL}/borellion-default-mobile-phone-interstitial.jpg`
         }
     },
     'billboard': {
         width: 3.88,
         height: 1,
         style: {
-            'standard': `${assetsURL}/zesty-default-billboard.png`,
-            'minimal': `${assetsURL}/zesty-default-billboard.png`,
-            'transparent': `${assetsURL}/zesty-default-billboard.png`
+            'standard': `${assetsURL}/borellion-default-billboard.jpg`,
+            'minimal': `${assetsURL}/borellion-default-billboard.jpg`,
+            'transparent': `${assetsURL}/borellion-default-billboard.jpg`
         }
     },
     'medium-rectangle': {
         width: 1.2,
         height: 1,
         style: {
-            'standard': `${assetsURL}/zesty-default-medium-rectangle.png`,
-            'minimal': `${assetsURL}/zesty-default-medium-rectangle.png`,
-            'transparent': `${assetsURL}/zesty-default-medium-rectangle.png`
+            'standard': `${assetsURL}/borellion-default-medium-rectangle.jpg`,
+            'minimal': `${assetsURL}/borellion-default-medium-rectangle.jpg`,
+            'transparent': `${assetsURL}/borellion-default-medium-rectangle.jpg`
         }
     }
 }
