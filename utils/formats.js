@@ -32,27 +32,27 @@ const formats = {
         width: 0.56,
         height: 1,
         style: {
-            'standard': `${assetsURL}/borellion-default-mobile-phone-interstitial.png`,
-            'minimal': `${assetsURL}/borellion-default-mobile-phone-interstitial.png`,
-            'transparent': `${assetsURL}/borellion-default-mobile-phone-interstitial.png`
+            'standard': `${assetsURL}/borellion-default-mobile-phone-interstitial.jpg`,
+            'minimal': `${assetsURL}/borellion-default-mobile-phone-interstitial.jpg`,
+            'transparent': `${assetsURL}/borellion-default-mobile-phone-interstitial.jpg`
         }
     },
     'billboard': {
         width: 3.88,
         height: 1,
         style: {
-            'standard': `${assetsURL}/borellion-default-billboard.png`,
-            'minimal': `${assetsURL}/borellion-default-billboard.png`,
-            'transparent': `${assetsURL}/borellion-default-billboard.png`
+            'standard': `${assetsURL}/borellion-default-billboard.jpg`,
+            'minimal': `${assetsURL}/borellion-default-billboard.jpg`,
+            'transparent': `${assetsURL}/borellion-default-billboard.jpg`
         }
     },
     'medium-rectangle': {
         width: 1.2,
         height: 1,
         style: {
-            'standard': `${assetsURL}/borellion-default-medium-rectangle.png`,
-            'minimal': `${assetsURL}/borellion-default-medium-rectangle.png`,
-            'transparent': `${assetsURL}/borellion-default-medium-rectangle.png`
+            'standard': `${assetsURL}/borellion-default-medium-rectangle.jpg`,
+            'minimal': `${assetsURL}/borellion-default-medium-rectangle.jpg`,
+            'transparent': `${assetsURL}/borellion-default-medium-rectangle.jpg`
         }
     }
 }
