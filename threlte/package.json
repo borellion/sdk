@@ -1,6 +1,6 @@
 {
   "name": "@borellion/threlte-sdk",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Threlte SDK for Borellion Banner integration.",
   "type": "module",
   "main": "dist/borellion-threlte-sdk.js",

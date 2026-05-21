@@ -1,6 +1,6 @@
 {
   "name": "@borellion/wonderland-sdk",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Wonderland Engine SDK for Borellion Banner integration.",
   "main": "dist/borellion-wonderland-sdk.js",
   "exports": {

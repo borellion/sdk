@@ -1,6 +1,6 @@
 {
   "name": "@borellion/r3f-sdk",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "This is the react-three-fiber SDK for Borellion Banner integration.",
   "main": "dist/borellion-r3f-sdk.js",
   "exports": {

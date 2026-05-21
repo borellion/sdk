@@ -1,6 +1,6 @@
 {
   "name": "@borellion/beacon",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Enables a Borellion Beacon on a virtual space, allowing users to collect analytics on visitor numbers.",
   "main": "dist/borellion-beacon.js",
   "files": [
