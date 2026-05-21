@@ -39,7 +39,6 @@
   "workspaces": [
     "aframe",
     "babylonjs",
-    "beacon",
     "r3f",
     "threejs",
     "utils",
