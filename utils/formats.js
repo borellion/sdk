@@ -6,8 +6,8 @@ const formats = {
         height: 1,
         style: {
             'standard': `${assetsURL}/zesty-banner-tall.png`,
-            'minimal': `${assetsURL}/zesty-banner-tall-minimal.png`,
-            'transparent': `${assetsURL}/zesty-banner-tall-transparent.png`
+            'minimal': `${assetsURL}/zesty-banner-tall.png`,
+            'transparent': `${assetsURL}/zesty-banner-tall.png`
         }
     },
     'wide': {
@@ -15,8 +15,8 @@ const formats = {
         height: 1,
         style: {
             'standard': `${assetsURL}/zesty-banner-wide.png`,
-            'minimal': `${assetsURL}/zesty-banner-wide-minimal.png`,
-            'transparent': `${assetsURL}/zesty-banner-wide-transparent.png`
+            'minimal': `${assetsURL}/zesty-banner-wide.png`,
+            'transparent': `${assetsURL}/zesty-banner-wide.png`
         }
     },
     'square': {
@@ -24,8 +24,8 @@ const formats = {
         height: 1,
         style: {
             'standard': `${assetsURL}/zesty-banner-square.png`,
-            'minimal': `${assetsURL}/zesty-banner-square-minimal.png`,
-            'transparent': `${assetsURL}/zesty-banner-square-transparent.png`
+            'minimal': `${assetsURL}/zesty-banner-square.png`,
+            'transparent': `${assetsURL}/zesty-banner-square.png`
         }
     },
     'mobile-phone-interstitial': {
