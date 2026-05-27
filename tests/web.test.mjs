@@ -27,17 +27,17 @@ test.describe('Initial load', () => {
 
 test.describe('Default banners', () => {
   test('Banners start collapsed before any ad fills', async ({ page }) => {
-    // Navigate with domcontentloaded: connectedCallback has run (display:none set) but
-    // no async fills (min ~5s via prebid retries) have had time to fire yet
-    await page.goto('http://localhost:8080/tests/web/', { waitUntil: 'domcontentloaded' });
-    const [display1, display2, display3] = await page.evaluate(() => [
-      document.getElementById('banner1').style.display,
-      document.getElementById('banner2').style.display,
-      document.getElementById('banner3').style.display,
-    ]);
-    expect(display1).toBe('none');
-    expect(display2).toBe('none');
-    expect(display3).toBe('none');
+    // Create a fresh element synchronously — connectedCallback fires during appendChild,
+    // and no async fills can happen within the evaluate callback.
+    const display = await page.evaluate(() => {
+      const el = document.createElement('borellion-ad');
+      el.setAttribute('ad-unit', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+      document.body.appendChild(el);
+      const result = el.style.display;
+      document.body.removeChild(el);
+      return result;
+    });
+    expect(display).toBe('none');
   });
 });
 

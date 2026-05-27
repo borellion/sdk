@@ -69,13 +69,18 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(([v]) => window.scene.children[1].children[0].material?.map?.source?.data?.currentSrc == v, [EXAMPLE_IMAGE_MEDIUM_RECTANGLE]);
+    await page.waitForFunction(([v1, v2, v3]) =>
+      window.scene.children[1].children[0].material?.map?.source?.data?.currentSrc == v1 &&
+      window.scene.children[2].children[0].material?.map?.source?.data?.currentSrc == v2 &&
+      window.scene.children[3].children[0].material?.map?.source?.data?.currentSrc == v3,
+      [EXAMPLE_IMAGE_MEDIUM_RECTANGLE, EXAMPLE_IMAGE_BILLBOARD, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL]
+    );
     const img1 = await page.evaluate(() => window.scene.children[1].children[0].material.map.source.data.currentSrc);
     const img2 = await page.evaluate(() => window.scene.children[2].children[0].material.map.source.data.currentSrc);
     const img3 = await page.evaluate(() => window.scene.children[3].children[0].material.map.source.data.currentSrc);
-    expect(EXAMPLE_IMAGE_MEDIUM_RECTANGLE).toContain(img1);
-    expect(EXAMPLE_IMAGE_BILLBOARD).toContain(img2);
-    expect(EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL).toContain(img3);
+    expect(img1).toBe(EXAMPLE_IMAGE_MEDIUM_RECTANGLE);
+    expect(img2).toBe(EXAMPLE_IMAGE_BILLBOARD);
+    expect(img3).toBe(EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL);
   });
 
   test('Ad creative links out to correct URL', async ({ page }) => {
