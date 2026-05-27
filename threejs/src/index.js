@@ -47,7 +47,9 @@ export default class Borellion extends Mesh {
 
     const applyTexture = (campaign) => {
       const { asset_url: image, cta_url: url } = campaign.Ads[0];
-      this.banner = { url, campaignId: campaign.CampaignId };
+      this.banner.src = image;
+      this.banner.url = url;
+      this.banner.campaignId = campaign.CampaignId;
       new TextureLoader().load(image, (texture) => {
         this.material.map = texture;
         this.material.needsUpdate = true;
@@ -112,7 +114,9 @@ export default class Borellion extends Mesh {
       fetchCampaignAd(this.adUnit, this.format, this.style, this.prebid, this.customDefaultImage, this.customDefaultCtaUrl, {
         onFill: (campaign) => {
           const { asset_url: image, cta_url: url } = campaign.Ads[0];
-          this.banner = { url, campaignId: campaign.CampaignId };
+          this.banner.src = image;
+          this.banner.url = url;
+          this.banner.campaignId = campaign.CampaignId;
           new TextureLoader().load(image, (texture) => {
             this.material.map = texture;
             this.material.needsUpdate = true;

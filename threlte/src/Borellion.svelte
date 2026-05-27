@@ -30,32 +30,37 @@
   let meshRef;
   let modalTriggers = {};
 
-  const loadBanner = async () => {
-    const activeCampaign = await fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl);
-    const { asset_url, cta_url } = activeCampaign.Ads[0];
+  onMount(() => {
+    fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl, {
+      onDefault: ({ Ads: [{ asset_url, cta_url }], CampaignId }) => {
+        bannerData = { cta_url, campaignId: CampaignId };
+        if (meshRef) meshRef.url = cta_url;
+        new THREE.TextureLoader().load(asset_url, tex => {
+          material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+        });
+      },
+      onFill: (activeCampaign) => {
+        const { asset_url, cta_url } = activeCampaign.Ads[0];
 
-    if (modalTrigger) {
-      if (modalTriggers[adUnit]) {
-        document.removeEventListener(modalTrigger, modalTriggers[adUnit]);
+        if (modalTrigger) {
+          if (modalTriggers[adUnit]) {
+            document.removeEventListener(modalTrigger, modalTriggers[adUnit]);
+          }
+          modalTriggers[adUnit] = () => {
+            const modal = constructAdModal(adUnit, activeCampaign.CampaignId, format, asset_url, cta_url, modalBackground, modalDelay);
+            document.body.appendChild(modal);
+          };
+          document.addEventListener(modalTrigger, modalTriggers[adUnit]);
+        }
+
+        if (beacon) sendOnLoadMetric(adUnit, activeCampaign.CampaignId);
+        bannerData = { cta_url, campaignId: activeCampaign.CampaignId };
+        if (meshRef) meshRef.url = cta_url;
+
+        new THREE.TextureLoader().load(asset_url, tex => {
+          material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+        });
       }
-      modalTriggers[adUnit] = () => {
-        const modal = constructAdModal(adUnit, activeCampaign.CampaignId, format, asset_url, cta_url, modalBackground, modalDelay);
-        document.body.appendChild(modal);
-      };
-      document.addEventListener(modalTrigger, modalTriggers[adUnit]);
-    }
-
-    return { asset_url, cta_url, campaignId: activeCampaign.CampaignId };
-  };
-
-  onMount(async () => {
-    const data = await loadBanner();
-    if (beacon) sendOnLoadMetric(adUnit, data.campaignId);
-    bannerData = data;
-    if (meshRef) meshRef.url = data.cta_url;
-
-    new THREE.TextureLoader().load(data.asset_url, tex => {
-      material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
     });
   });
 
@@ -73,10 +78,13 @@
       cam.matrixWorld.toArray()
     );
     if (isVisible) {
-      loadBanner().then(data => {
-        new THREE.TextureLoader().load(data.asset_url, tex => {
-          material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-        });
+      fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl, {
+        onFill: (activeCampaign) => {
+          const { asset_url } = activeCampaign.Ads[0];
+          new THREE.TextureLoader().load(asset_url, tex => {
+            material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+          });
+        }
       });
     }
   }, AD_REFRESH_INTERVAL);

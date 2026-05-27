@@ -81,7 +81,7 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(() => window.scene.children[1].banner?.url != null);
+    await page.waitForFunction(([v]) => window.scene.children[1].banner?.url?.includes(v), [EXAMPLE_URL]);
     const link1 = await page.evaluate(() => window.scene.children[1].banner.url);
     const link2 = await page.evaluate(() => window.scene.children[2].banner.url);
     const link3 = await page.evaluate(() => window.scene.children[3].banner.url);

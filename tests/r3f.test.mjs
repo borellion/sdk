@@ -53,7 +53,7 @@ test.describe('Default banners', () => {
 
 test.describe('Navigation', () => {
   test('Clicking the banner navigates to a new page', async ({ page, context }) => {
-    await page.waitForFunction(() => window.scene?.children[1]?.children[0]?.material?.map?.source != null);
+    await page.waitForFunction(() => window.scene?.children[1]?.children[0]?.url != null);
     const [newPage] = await Promise.all([
       context.waitForEvent('page'),
       page.evaluate(() => window.scene.children[1].children[0].__r3f.handlers.onClick())
@@ -82,7 +82,7 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(() => window.scene.children[1].children[0].url != null);
+    await page.waitForFunction(([v]) => window.scene.children[1].children[0].url?.includes(v), [EXAMPLE_URL]);
     const link1 = await page.evaluate(() => window.scene.children[1].children[0].url);
     const link2 = await page.evaluate(() => window.scene.children[2].children[0].url);
     const link3 = await page.evaluate(() => window.scene.children[3].children[0].url);
@@ -121,7 +121,7 @@ test.describe('Prebid', () => {
 test.describe('Modal', () => {
   test('An ad modal is created when the modal trigger event is fired', async ({ page }) => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
-    await page.waitForFunction(() => window.scene.children[1].children[0].material.map?.source.data.currentSrc != null);
+    await page.waitForFunction(([v]) => window.scene.children[1].children[0].material.map?.source.data.currentSrc == v, [EXAMPLE_IMAGE_MEDIUM_RECTANGLE]);
     await page.evaluate(() => {
       let event = new CustomEvent('lose');
       document.dispatchEvent(event);

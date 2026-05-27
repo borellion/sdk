@@ -40,19 +40,25 @@ class Borellion extends HTMLElement {
       img.style.height = height;
       img.setAttribute('crossorigin', '');
 
+      img.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = img.getAttribute('data-url');
+        if (!url) return;
+        openURL(url);
+        const campaignId = img.getAttribute('data-campaign-id');
+        if (beacon) sendOnClickMetric(adUnit, campaignId);
+      });
+
       fetchCampaignAd(adUnit, format, 'standard', prebid, null, null, {
-        onDefault: ({ Ads: [{ asset_url }] }) => {
+        onDefault: ({ Ads: [{ asset_url, cta_url }] }) => {
           img.setAttribute('src', asset_url);
+          img.setAttribute('data-url', cta_url);
         },
         onFill: (activeCampaign) => {
           const { id, asset_url: image, cta_url: url } = activeCampaign.Ads[0];
           img.setAttribute('id', id);
           img.setAttribute('data-url', url);
-          img.addEventListener('click', (e) => {
-            e.preventDefault();
-            openURL(url);
-            if (beacon) sendOnClickMetric(adUnit, activeCampaign.CampaignId);
-          });
+          img.setAttribute('data-campaign-id', activeCampaign.CampaignId);
           if (beacon) sendOnLoadMetric(adUnit, activeCampaign.CampaignId);
           if (image) img.setAttribute('src', image);
         }

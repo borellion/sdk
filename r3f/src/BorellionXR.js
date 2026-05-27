@@ -41,7 +41,9 @@ export default function Borellion(props) {
 
   useEffect(() => {
     fetchCampaignAd(adUnit, format, newStyle, prebid, customDefaultImage, customDefaultCtaUrl, {
-      onDefault: ({ Ads: [{ asset_url }] }) => {
+      onDefault: ({ Ads: [{ asset_url, cta_url }], CampaignId }) => {
+        setBannerData({ image: asset_url, url: cta_url, campaignId: CampaignId });
+        mesh.current.url = cta_url;
         new THREE.TextureLoader().load(asset_url, tex => {
           setMaterial(new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
         });

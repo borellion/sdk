@@ -59,7 +59,7 @@ test.describe('Default banners', () => {
 
 test.describe('Navigation', () => {
   test('Clicking the banner navigates to a new page', async ({ page, context }) => {
-    await page.waitForFunction(() => window.scene?.meshes[6]?.actionManager != null);
+    await page.waitForFunction(() => window.scene?.meshes[6]?.url != null);
     const [newPage] = await Promise.all([
       context.waitForEvent('page'),
       page.evaluate(() => window.scene.meshes[6].actionManager.actions[0].func())
@@ -93,7 +93,7 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(() => window.scene.meshes[4].url != null && window.scene.meshes[5].url != null && window.scene.meshes[6].url != null);
+    await page.waitForFunction(([v]) => window.scene.meshes[4].url?.includes(v), [EXAMPLE_URL]);
     const link1 = await page.evaluate(() => window.scene.meshes[4].url);
     const link2 = await page.evaluate(() => window.scene.meshes[5].url);
     const link3 = await page.evaluate(() => window.scene.meshes[6].url);
