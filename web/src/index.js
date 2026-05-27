@@ -22,6 +22,7 @@ class Borellion extends HTMLElement {
 
   connectedCallback() {
     this.style.cursor = 'pointer';
+    this.style.display = 'none';
 
     this.adUnit = this.hasAttribute('ad-unit') ? this.getAttribute('ad-unit') : this.adUnit;
     this.format = this.hasAttribute('format') ? this.getAttribute('format') : this.format;
@@ -32,6 +33,7 @@ class Borellion extends HTMLElement {
 
     this.adjustHeightandWidth();
 
+    const el = this;
     function loadBanner(adUnit, format, shadow, width, height, beacon, prebid) {
       const img = document.createElement('img');
       shadow.innerHTML = '';
@@ -50,11 +52,11 @@ class Borellion extends HTMLElement {
       });
 
       fetchCampaignAd(adUnit, format, 'standard', prebid, null, null, {
-        onDefault: ({ Ads: [{ asset_url, cta_url }] }) => {
-          img.setAttribute('src', asset_url);
+        onDefault: ({ Ads: [{ cta_url }] }) => {
           img.setAttribute('data-url', cta_url);
         },
         onFill: (activeCampaign) => {
+          el.style.display = '';
           const { id, asset_url: image, cta_url: url } = activeCampaign.Ads[0];
           img.setAttribute('id', id);
           img.setAttribute('data-url', url);
