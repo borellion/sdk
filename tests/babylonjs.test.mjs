@@ -75,11 +75,11 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(([v]) =>
-      window.scene.meshes[4].material?.diffuseTexture?.url == v &&
-      window.scene.meshes[5].material?.diffuseTexture != null &&
-      window.scene.meshes[6].material?.diffuseTexture != null,
-      [EXAMPLE_IMAGE_MEDIUM_RECTANGLE]
+    await page.waitForFunction(([v1, v2, v3]) =>
+      window.scene.meshes[4].material?.diffuseTexture?.url == v1 &&
+      window.scene.meshes[5].material?.diffuseTexture?.url == v2 &&
+      window.scene.meshes[6].material?.diffuseTexture?.url == v3,
+      [EXAMPLE_IMAGE_MEDIUM_RECTANGLE, EXAMPLE_IMAGE_BILLBOARD, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL]
     );
     const img1 = await page.evaluate(() => window.scene.meshes[4].material.diffuseTexture.url);
     const img2 = await page.evaluate(() => window.scene.meshes[5].material.diffuseTexture.url);
@@ -93,7 +93,12 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(([v]) => window.scene.meshes[4].url?.includes(v), [EXAMPLE_URL]);
+    await page.waitForFunction(([v1, v2, v3]) =>
+      window.scene.meshes[4].url?.includes(v1) &&
+      window.scene.meshes[5].url?.includes(v2) &&
+      window.scene.meshes[6].url?.includes(v3),
+      [EXAMPLE_URL, EXAMPLE_URL2, EXAMPLE_URL3]
+    );
     const link1 = await page.evaluate(() => window.scene.meshes[4].url);
     const link2 = await page.evaluate(() => window.scene.meshes[5].url);
     const link3 = await page.evaluate(() => window.scene.meshes[6].url);
