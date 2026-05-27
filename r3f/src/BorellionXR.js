@@ -74,7 +74,7 @@ export default function Borellion(props) {
 
   const onClick = (event) => {
     const banner = bannerData;
-    let url = banner.url || banner.properties?.url;
+    let url = banner.url || banner.properties?.url || mesh.current?.url;
     if (gl.xr.isPresenting) {
       const session = gl.xr.getSession();
       if (session) session.end();

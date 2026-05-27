@@ -68,7 +68,12 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(([v]) => window.scene.children[1].banner?.src == v, [EXAMPLE_IMAGE_MEDIUM_RECTANGLE]);
+    await page.waitForFunction(([v1, v2, v3]) =>
+      window.scene.children[1].banner?.src == v1 &&
+      window.scene.children[2].banner?.src == v2 &&
+      window.scene.children[3].banner?.src == v3,
+      [EXAMPLE_IMAGE_MEDIUM_RECTANGLE, EXAMPLE_IMAGE_BILLBOARD, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL]
+    );
     const img1 = await page.evaluate(() => window.scene.children[1].banner.src);
     const img2 = await page.evaluate(() => window.scene.children[2].banner.src);
     const img3 = await page.evaluate(() => window.scene.children[3].banner.src);
@@ -81,7 +86,12 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(([v]) => window.scene.children[1].banner?.url?.includes(v), [EXAMPLE_URL]);
+    await page.waitForFunction(([v1, v2, v3]) =>
+      window.scene.children[1].banner?.url?.includes(v1) &&
+      window.scene.children[2].banner?.url?.includes(v2) &&
+      window.scene.children[3].banner?.url?.includes(v3),
+      [EXAMPLE_URL, EXAMPLE_URL2, EXAMPLE_URL3]
+    );
     const link1 = await page.evaluate(() => window.scene.children[1].banner.url);
     const link2 = await page.evaluate(() => window.scene.children[2].banner.url);
     const link3 = await page.evaluate(() => window.scene.children[3].banner.url);
