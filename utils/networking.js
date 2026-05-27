@@ -160,7 +160,7 @@ const getSampleBanner = (format) => {
   return { Ads: [{ asset_url: `${DB_ENDPOINT}/ad/sample?format=${format}&timestamp=${Date.now()}`, cta_url: DEFAULT_CTA_URL }], CampaignId: DEFAULT_CAMPAIGN_ID }
 }
 
-const fetchFromZestyAPI = async (adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage = null, customDefaultCtaUrl = null) => {
+const fetchFromBorellionAPI = async (adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage = null, customDefaultCtaUrl = null) => {
   try {
     const url = encodeURI(window.location.href).replace(/\/$/, ''); // If URL ends with a slash, remove it
     const res = await fetch(`${DB_ENDPOINT}/ad?ad_unit_id=${adUnitId}&url=${url}`);
@@ -207,7 +207,7 @@ Check https://docs.borellion.com/guides/developers/ad-units for more information
 
   // Skip Prebid entirely if disabled - go directly to Borellion API
   if (!prebid) {
-    fetchFromZestyAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl)
+    fetchFromBorellionAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl)
       .then(result => onFill?.(result));
     return;
   }
@@ -252,7 +252,7 @@ Check https://docs.borellion.com/guides/developers/ad-units for more information
     } else {
       currentTries[adUnitId]++;
       if (currentTries[adUnitId] == retryCount) {
-        const result = await fetchFromZestyAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl);
+        const result = await fetchFromBorellionAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl);
         currentTries[adUnitId] = 0;
         onFill?.(result);
       } else {

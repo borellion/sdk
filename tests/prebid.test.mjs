@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
-  checkZestyDiv
+  checkBorellionDiv
 } from './test-constants.mjs';
 
 test.beforeEach(async ({ page }) => {
@@ -11,17 +11,17 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test.describe('Zesty DIV behavior', () => {
+test.describe('Borellion DIV behavior', () => {
   test('Check div when format is non-IAB', async ({ page }) => {
-    expect(await checkZestyDiv(page))
+    expect(await checkBorellionDiv(page))
   });
   test('Check div when format is medium-rectangle', async ({ page }) => {
-    expect(await checkZestyDiv(page, 'medium-rectangle'))
+    expect(await checkBorellionDiv(page, 'medium-rectangle'))
   });
   test('Check div when format is billboard', async ({ page }) => {
-    expect(await checkZestyDiv(page, 'billboard'))
+    expect(await checkBorellionDiv(page, 'billboard'))
   });
   test('Check div when format is mobile-phone-interstitial', async ({ page }) => {
-    expect(await checkZestyDiv(page, 'mobile-phone-interstitial'))
+    expect(await checkBorellionDiv(page, 'mobile-phone-interstitial'))
   });
 })

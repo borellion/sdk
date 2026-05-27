@@ -187,7 +187,7 @@ test.describe('openURL', async () => {
     expect(result).toBe('Deeplink');
   });
   test('Any other URL should link regularly', async () => {
-    const result = openURL('https://app.zesty.market/');
+    const result = openURL('https://borellion.com/');
     expect(result).toBe('Link');
   });
 });
