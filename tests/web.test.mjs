@@ -26,10 +26,15 @@ test.describe('Initial load', () => {
 });
 
 test.describe('Default banners', () => {
-  test('Banners are collapsed when no ad fills', async ({ page }) => {
-    const display1 = await page.evaluate(() => document.getElementById('banner1').style.display);
-    const display2 = await page.evaluate(() => document.getElementById('banner2').style.display);
-    const display3 = await page.evaluate(() => document.getElementById('banner3').style.display);
+  test('Banners start collapsed before any ad fills', async ({ page }) => {
+    // Navigate with domcontentloaded: connectedCallback has run (display:none set) but
+    // no async fills (min ~5s via prebid retries) have had time to fire yet
+    await page.goto('http://localhost:8080/tests/web/', { waitUntil: 'domcontentloaded' });
+    const [display1, display2, display3] = await page.evaluate(() => [
+      document.getElementById('banner1').style.display,
+      document.getElementById('banner2').style.display,
+      document.getElementById('banner3').style.display,
+    ]);
     expect(display1).toBe('none');
     expect(display2).toBe('none');
     expect(display3).toBe('none');
