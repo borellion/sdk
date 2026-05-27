@@ -20,9 +20,16 @@ const MOCK_IFRAME_SETUP2 = {
 
 test.describe('fetchCampaignAd', () => {
   test('fetchCampaignAd should return a default banner if no URI is given', () => {
-    return expect(fetchCampaignAd()).resolves.toMatchObject(
-      { Ads: [{ asset_url: DEFAULT_BANNER, cta_url: DEFAULT_CTA_URL }], CampaignId: DEFAULT_CAMPAIGN_ID }
-    )
+    return new Promise((resolve) => {
+      fetchCampaignAd(undefined, 'tall', 'standard', true, null, null, {
+        onDefault: (campaign) => {
+          expect(campaign).toMatchObject(
+            { Ads: [{ asset_url: DEFAULT_BANNER, cta_url: DEFAULT_CTA_URL }], CampaignId: DEFAULT_CAMPAIGN_ID }
+          );
+          resolve();
+        }
+      });
+    });
   });
 
   test('fetchCampaignAd should strip trailing slashes from URLs before sending them to ad server', () => {

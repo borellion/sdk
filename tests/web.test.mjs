@@ -26,34 +26,24 @@ test.describe('Initial load', () => {
 });
 
 test.describe('Default banners', () => {
-  test('The medium-rectangle banner is displaying the correct default image', async ({ page }) => {
-    await page.waitForFunction(() => document.getElementById('banner1').shadowRoot.children[0]);
-    const banner1 = await page.evaluate(
-      () => document.getElementById('banner1').shadowRoot.children[0].src
-    );
-    expect(banner1.split('/').pop()).toBe('borellion-default-medium-rectangle.jpg');
-  });
-
-  test('The billboard banner is displaying the correct default image', async ({ page }) => {
-    await page.waitForFunction(() => document.getElementById('banner2').shadowRoot.children[0]);
-    const banner2 = await page.evaluate(
-      () => document.getElementById('banner2').shadowRoot.children[0].src
-    );
-    expect(banner2.split('/').pop()).toBe('borellion-default-billboard.jpg');
-  });
-
-  test('The mobile-phone-interstitial banner is displaying the correct default image', async ({ page }) => {
-    await page.waitForFunction(() => document.getElementById('banner3').shadowRoot.children[0]);
-    const banner3 = await page.evaluate(
-      () => document.getElementById('banner3').shadowRoot.children[0].src
-    );
-    expect(banner3.split('/').pop()).toBe('borellion-default-mobile-phone-interstitial.jpg');
+  test('Banners start collapsed before any ad fills', async ({ page }) => {
+    // Create a fresh element synchronously — connectedCallback fires during appendChild,
+    // and no async fills can happen within the evaluate callback.
+    const display = await page.evaluate(() => {
+      const el = document.createElement('borellion-ad');
+      el.setAttribute('ad-unit', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+      document.body.appendChild(el);
+      const result = el.style.display;
+      document.body.removeChild(el);
+      return result;
+    });
+    expect(display).toBe('none');
   });
 });
 
 test.describe('Navigation', () => {
   test('Clicking the banner navigates to a new page', async ({ page, context }) => {
-    await page.waitForFunction(() => document.getElementById('banner1').shadowRoot.children[0]);
+    await page.waitForFunction(() => document.getElementById('banner1').style.display !== 'none');
     const [newPage] = await Promise.all([
       context.waitForEvent('page'),
       page.evaluate(() => document.getElementById('banner1').shadowRoot.children[0].click())

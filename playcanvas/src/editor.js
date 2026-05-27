@@ -1,7 +1,6 @@
 import { fetchCampaignAd, sendOnLoadMetric, sendOnClickMetric, AD_REFRESH_INTERVAL, DEFAULT_CTA_URL, DEFAULT_CAMPAIGN_ID } from '../../utils/networking';
 import { openURL, visibilityCheck, constructAdModal } from '../../utils/helpers';
 import { formats } from '../../utils/formats';
-import { getDefaultBanner } from '../../utils/networking';
 
 /** @type {typeof import("playcanvas").ScriptType} */
 const Borellion = pc.createScript('borellion');
@@ -68,30 +67,6 @@ Borellion.prototype.initialize = function() {
     this.refreshIfVisible.bind(this)();
 };
 
-Borellion.prototype.loadBanner = async function() {
-    const activeBanner = await fetchCampaignAd(this.adUnitId, FORMATS[this.format], 'standard', this.prebid, this.customDefaultImage, this.customDefaultCtaUrl);
-
-    const { asset_url: image, cta_url: url } = activeBanner.Ads[0];
-
-    // Hook up modal trigger
-    if (this.modalTrigger) {
-      // Remove old listener if it exists
-      if (modalTriggers[this.adUnitId]) {
-        document.removeEventListener(this.modalTrigger, modalTriggers[this.adUnitId]);
-      }
-
-      // Create and store new handler
-      modalTriggers[this.adUnitId] = () => {
-        let modal = constructAdModal(this.adUnitId, activeBanner.CampaignId, FORMATS[this.format], image, url, this.modalBackground, this.modalDelay);
-        document.body.appendChild(modal);
-      };
-
-      document.addEventListener(this.modalTrigger, modalTriggers[adUnit]);
-    }
-
-    return { image, url, campaignId: activeBanner.CampaignId };
-}
-
 Borellion.prototype.refreshIfVisible = function() {
     /** @type {import("playcanvas").CameraComponent} */
     const camera = this.useActiveCamera ? this.app.scene._activeCamera : this.cameraEntity.camera;
@@ -108,16 +83,8 @@ Borellion.prototype.refreshIfVisible = function() {
     );
     if (isVisible) {
         const self = this;
-        self.loadBanner(self.adUnitId, FORMATS[self.format], self.customDefaultImage, self.customDefaultCtaUrl).then(banner => {
-            const handleBanner = (err, asset) => {
-                if (err) {
-                    const defaultBanner = getDefaultBanner(self.format, 'standard');
-                    self.ctaUrl = defaultBanner.Ads[0].cta_url;
-                    self.campaignId = defaultBanner.CampaignId;
-                } else {
-                    self.ctaUrl = banner.url;
-                    self.campaignId = banner.campaignId;
-                }
+        const applyTexture = (image) => {
+            self.app.assets.loadFromUrl(image, "texture", (err, asset) => {
                 const texture = asset?._resources[0];
                 if (texture) {
                     const material = self.bannerMaterial.clone();
@@ -127,8 +94,30 @@ Borellion.prototype.refreshIfVisible = function() {
                     self.bannerEntity.render.meshInstances[0].material = material;
                     self.bannerEntity.render.meshInstances[0].material.update();
                 }
-            };
-            self.app.assets.loadFromUrl(banner.image, "texture", handleBanner);
+            });
+        };
+        fetchCampaignAd(self.adUnitId, FORMATS[self.format], 'standard', self.prebid, self.customDefaultImage, self.customDefaultCtaUrl, {
+            onDefault: ({ Ads: [{ asset_url }] }) => {
+                applyTexture(asset_url);
+            },
+            onFill: (activeBanner) => {
+                const { asset_url: image, cta_url: url } = activeBanner.Ads[0];
+
+                if (self.modalTrigger) {
+                    if (modalTriggers[self.adUnitId]) {
+                        document.removeEventListener(self.modalTrigger, modalTriggers[self.adUnitId]);
+                    }
+                    modalTriggers[self.adUnitId] = () => {
+                        let modal = constructAdModal(self.adUnitId, activeBanner.CampaignId, FORMATS[self.format], image, url, self.modalBackground, self.modalDelay);
+                        document.body.appendChild(modal);
+                    };
+                    document.addEventListener(self.modalTrigger, modalTriggers[self.adUnitId]);
+                }
+
+                self.ctaUrl = url;
+                self.campaignId = activeBanner.CampaignId;
+                applyTexture(image);
+            }
         });
     }
 }

@@ -160,7 +160,7 @@ const getSampleBanner = (format) => {
   return { Ads: [{ asset_url: `${DB_ENDPOINT}/ad/sample?format=${format}&timestamp=${Date.now()}`, cta_url: DEFAULT_CTA_URL }], CampaignId: DEFAULT_CAMPAIGN_ID }
 }
 
-const fetchFromZestyAPI = async (adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage = null, customDefaultCtaUrl = null) => {
+const fetchFromBorellionAPI = async (adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage = null, customDefaultCtaUrl = null) => {
   try {
     const url = encodeURI(window.location.href).replace(/\/$/, ''); // If URL ends with a slash, remove it
     const res = await fetch(`${DB_ENDPOINT}/ad?ad_unit_id=${adUnitId}&url=${url}`);
@@ -174,34 +174,42 @@ const fetchFromZestyAPI = async (adUnitId, format, style, shouldOverride, overri
   }
 }
 
-const fetchCampaignAd = async (adUnitId, format = 'tall', style = 'standard', prebid = true, customDefaultImage = null, customDefaultCtaUrl = null) => {
+const fetchCampaignAd = (adUnitId, format = 'tall', style = 'standard', prebid = true, customDefaultImage = null, customDefaultCtaUrl = null, { onDefault, onFill } = {}) => {
   if (['tall', 'wide', 'square'].includes(format)) {
     console.warn(`The old Zesty banner formats (tall, wide, and square) are being deprecated and will be removed in a future version. Please update to one of the new IAB formats (mobile-phone-interstitial, billboard, and medium-rectangle).
 Check https://docs.borellion.com/guides/developers/ad-units for more information.`);
   }
 
+  let overrideEntry = getOverrideUnitInfo(adUnitId);
+  let shouldOverride = (overrideEntry?.oldFormat && format == overrideEntry?.oldFormat) ?? false;
+
+  // Immediately provide the default banner so callers can render something right away
+  onDefault?.(getDefaultBanner(format, style, shouldOverride, overrideEntry?.format, customDefaultImage, customDefaultCtaUrl));
+
   if (isDebug) {
-    return new Promise(res => res(getSampleBanner(format)));
+    onFill?.(getSampleBanner(format));
+    return;
   }
 
-  // Early exit if ad unit ID is an invalid format and would not map to a Zesty ad unit
+  // Early exit if ad unit ID is an invalid format and would not map to a Borellion ad unit
   try {
     parseUUID(adUnitId);
   } catch (e) {
     console.warn(`Ad unit ID ${adUnitId} is not a valid UUID.`);
-    return new Promise(res => res(getDefaultBanner(format, style, false, null, customDefaultImage, customDefaultCtaUrl)));
+    onFill?.(getDefaultBanner(format, style, false, null, customDefaultImage, customDefaultCtaUrl));
+    return;
   }
-
-  let overrideEntry = getOverrideUnitInfo(adUnitId);
-  let shouldOverride = (overrideEntry?.oldFormat && format == overrideEntry?.oldFormat) ?? false;
 
   if (!adUnitId) {
-    return new Promise(res => res(getDefaultBanner(format, style, shouldOverride, overrideEntry.format, customDefaultImage, customDefaultCtaUrl)));
+    onFill?.(getDefaultBanner(format, style, shouldOverride, overrideEntry.format, customDefaultImage, customDefaultCtaUrl));
+    return;
   }
 
-  // Skip Prebid entirely if disabled - go directly to Zesty API
+  // Skip Prebid entirely if disabled - go directly to Borellion API
   if (!prebid) {
-    return fetchFromZestyAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl);
+    fetchFromBorellionAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl)
+      .then(result => onFill?.(result));
+    return;
   }
 
   if (!prebidInit) {
@@ -229,34 +237,30 @@ Check https://docs.borellion.com/guides/developers/ad-units for more information
     }
   }
 
-  return new Promise((resolve, reject) => {
-    async function getBanner() {
-      if (bids[adUnitId]?.asset_url && bids[adUnitId]?.cta_url) {
-        // Clear the interval and grab the image+url from the prebid ad
-        const { asset_url, cta_url } = bids[adUnitId];
-        if (asset_url.startsWith('canvas://')) {
-          const canvasIframe = document.createElement('iframe');
-          canvasIframe.id = "borellion-canvas-iframe";
-          document.body.appendChild(canvasIframe);
-          canvasIframe.contentDocument.open();
-          canvasIframe.contentDocument.write(asset_url.split('canvas://')[1]);
-          canvasIframe.contentDocument.close();
-        }
-        resolve({ Ads: [{ asset_url, cta_url }], CampaignId: 'Prebid' });
+  async function getBanner() {
+    if (bids[adUnitId]?.asset_url && bids[adUnitId]?.cta_url) {
+      const { asset_url, cta_url } = bids[adUnitId];
+      if (asset_url.startsWith('canvas://')) {
+        const canvasIframe = document.createElement('iframe');
+        canvasIframe.id = "borellion-canvas-iframe";
+        document.body.appendChild(canvasIframe);
+        canvasIframe.contentDocument.open();
+        canvasIframe.contentDocument.write(asset_url.split('canvas://')[1]);
+        canvasIframe.contentDocument.close();
+      }
+      onFill?.({ Ads: [{ asset_url, cta_url }], CampaignId: 'Prebid' });
+    } else {
+      currentTries[adUnitId]++;
+      if (currentTries[adUnitId] == retryCount) {
+        const result = await fetchFromBorellionAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl);
+        currentTries[adUnitId] = 0;
+        onFill?.(result);
       } else {
-        // Wait to see if we get any winning bids. If we hit max retry count, fallback to Zesty ad server
-        currentTries[adUnitId]++;
-        if (currentTries[adUnitId] == retryCount) {
-          const result = await fetchFromZestyAPI(adUnitId, format, style, shouldOverride, overrideEntry, customDefaultImage, customDefaultCtaUrl);
-          currentTries[adUnitId] = 0;
-          resolve(result);
-        } else {
-          setTimeout(getBanner, 1000);
-        }
+        setTimeout(getBanner, 1000);
       }
     }
-    getBanner();
-  });
+  }
+  getBanner();
 }
 
 /**

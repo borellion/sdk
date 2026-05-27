@@ -22,29 +22,36 @@ export default class Borellion {
     this.xr = webXRExperienceHelper;
     this.prebid = prebid;
 
-    loadBanner(adUnit, format, style, prebid, config.customDefaultImage, config.customDefaultCtaUrl, config.modalTrigger, config.modalBackground, config.modalDelay).then(data => {
-      this.banner.material = data.mat;
-      this.banner.actionManager = new BABYLON.ActionManager(scene);
-      this.banner.url = data.url;
+    this.banner.actionManager = new BABYLON.ActionManager(scene);
+    this.banner.actionManager.registerAction(
+      new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+        if (webXRExperienceHelper?.baseExperience) {
+          webXRExperienceHelper.baseExperience.sessionManager.exitXRAsync().then(() => {
+            openURL(this.banner.url);
+          });
+        } else {
+          openURL(this.banner.url);
+        }
+        if (beacon) sendOnClickMetric(adUnit, this.banner.campaignId);
+      })
+    );
 
-      if (beacon) {
-        sendOnLoadMetric(adUnit, data.campaignId);
+    const applyMaterial = (campaign) => {
+      const { asset_url: image, cta_url: url } = campaign.Ads[0];
+      this.banner.url = url;
+      this.banner.campaignId = campaign.CampaignId;
+      const mat = new BABYLON.StandardMaterial('');
+      mat.diffuseTexture = new BABYLON.Texture(image);
+      mat.diffuseTexture.hasAlpha = true;
+      this.banner.material = mat;
+    };
+
+    fetchCampaignAd(adUnit, format, style, prebid, config.customDefaultImage, config.customDefaultCtaUrl, {
+      onDefault: applyMaterial,
+      onFill: (campaign) => {
+        applyMaterial(campaign);
+        if (beacon) sendOnLoadMetric(adUnit, campaign.CampaignId);
       }
-
-      this.banner.actionManager.registerAction(
-        new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-          if (webXRExperienceHelper?.baseExperience) {
-            webXRExperienceHelper.baseExperience.sessionManager.exitXRAsync().then(() => {
-              openURL(data.url);
-            });
-          } else {
-            openURL(data.url);
-          }
-          if (beacon) {
-            sendOnClickMetric(adUnit, data.campaignId);
-          }
-        })
-      );
     });
 
     setInterval(() => {
@@ -57,8 +64,12 @@ export default class Borellion {
         camera.getWorldMatrix().asArray()
       );
       if (isVisible) {
-        loadBanner(adUnit, format, style, this.prebid, config.customDefaultImage, config.customDefaultCtaUrl, config.modalTrigger, config.modalBackground, config.modalDelay).then(banner => {
-          this.banner.material.diffuseTexture.updateURL(banner.src);
+        fetchCampaignAd(adUnit, format, style, this.prebid, config.customDefaultImage, config.customDefaultCtaUrl, {
+          onFill: (campaign) => {
+            this.banner.material.diffuseTexture.updateURL(campaign.Ads[0].asset_url);
+            this.banner.url = campaign.Ads[0].cta_url;
+            this.banner.campaignId = campaign.CampaignId;
+          }
         });
       }
     }, AD_REFRESH_INTERVAL);
@@ -80,32 +91,5 @@ export default class Borellion {
   }
 }
 
-async function loadBanner(adUnit, format, style, prebid = true, customDefaultImage = null, customDefaultCtaUrl = null, modalTrigger = null, modalBackground = false, modalDelay = 0) {
-  const activeBanner = await fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl);
-
-  const { asset_url: image, cta_url: url } = activeBanner.Ads[0];
-
-  const mat = new BABYLON.StandardMaterial('');
-  mat.diffuseTexture = new BABYLON.Texture(image);
-  mat.diffuseTexture.hasAlpha = true;
-
-  // Hook up modal trigger
-  if (modalTrigger) {
-    // Remove old listener if it exists
-    if (modalTriggers[adUnit]) {
-      document.removeEventListener(modalTrigger, modalTriggers[adUnit]);
-    }
-
-    // Create and store new handler
-    modalTriggers[adUnit] = () => {
-      let modal = constructAdModal(adUnit, activeBanner.CampaignId, format, image, url, modalBackground, modalDelay);
-      document.body.appendChild(modal);
-    };
-
-    document.addEventListener(modalTrigger, modalTriggers[adUnit]);
-  }
-
-  return { mat: mat, src: image, uri: activeBanner.uri, url: url, campaignId: activeBanner.CampaignId };
-}
 
 window.Borellion = Borellion;

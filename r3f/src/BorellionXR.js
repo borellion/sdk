@@ -39,49 +39,42 @@ export default function Borellion(props) {
   const modalBackground = props.modalBackground ?? false;
   const modalDelay = props.modalDelay ?? 0;
 
-  const loadBanner = async (adUnit, format, style) => {
-    const activeCampaign = await fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl);
-    const { asset_url, cta_url } = activeCampaign.Ads[0];
-
-    // Hook up modal trigger
-    if (modalTrigger) {
-      // Remove old listener if it exists
-      if (modalTriggers[adUnit]) {
-        document.removeEventListener(modalTrigger, modalTriggers[adUnit]);
-      }
-
-      // Create and store new handler
-      modalTriggers[adUnit] = () => {
-        let modal = constructAdModal(adUnit, activeCampaign.CampaignId, format, asset_url, cta_url, modalBackground, modalDelay);
-        document.body.appendChild(modal);
-      };
-
-      document.addEventListener(modalTrigger, modalTriggers[adUnit]);
-    }
-
-    return { asset_url, cta_url, campaignId: activeCampaign.CampaignId }
-  };
-
   useEffect(() => {
-    loadBanner(adUnit, format, newStyle).then((data) => {
-      if (beacon) sendOnLoadMetric(adUnit, data.campaignId);
-      setBannerData({ image: data.asset_url, url: data.cta_url, campaignId: data.campaignId });
-      mesh.current.url = data.cta_url;
+    fetchCampaignAd(adUnit, format, newStyle, prebid, customDefaultImage, customDefaultCtaUrl, {
+      onDefault: ({ Ads: [{ asset_url, cta_url }], CampaignId }) => {
+        setBannerData({ image: asset_url, url: cta_url, campaignId: CampaignId });
+        mesh.current.url = cta_url;
+        new THREE.TextureLoader().load(asset_url, tex => {
+          setMaterial(new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+        });
+      },
+      onFill: (activeCampaign) => {
+        const { asset_url, cta_url } = activeCampaign.Ads[0];
+
+        if (modalTrigger) {
+          if (modalTriggers[adUnit]) {
+            document.removeEventListener(modalTrigger, modalTriggers[adUnit]);
+          }
+          modalTriggers[adUnit] = () => {
+            let modal = constructAdModal(adUnit, activeCampaign.CampaignId, format, asset_url, cta_url, modalBackground, modalDelay);
+            document.body.appendChild(modal);
+          };
+          document.addEventListener(modalTrigger, modalTriggers[adUnit]);
+        }
+
+        if (beacon) sendOnLoadMetric(adUnit, activeCampaign.CampaignId);
+        new THREE.TextureLoader().load(asset_url, tex => {
+          setMaterial(new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+        });
+        setBannerData({ image: asset_url, url: cta_url, campaignId: activeCampaign.CampaignId });
+        mesh.current.url = cta_url;
+      }
     });
   }, [adUnit]);
 
-  useEffect(() => {
-    if (bannerData) {
-      new THREE.TextureLoader().load(bannerData.image, tex => {
-        const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-        setMaterial(material);
-      });
-    }
-  }, [bannerData]);
-
   const onClick = (event) => {
     const banner = bannerData;
-    let url = banner.url || banner.properties?.url;
+    let url = banner.url || banner.properties?.url || mesh.current?.url;
     if (gl.xr.isPresenting) {
       const session = gl.xr.getSession();
       if (session) session.end();
@@ -116,8 +109,14 @@ export default function Borellion(props) {
         camera.matrixWorld.toArray(),
       );
       if (isVisible) {
-        loadBanner(adUnit, format, newStyle).then(banner => {
-          setBannerData({ image: banner.asset_url, url: banner.cta_url, campaignId: banner.campaignId });
+        fetchCampaignAd(adUnit, format, newStyle, prebid, customDefaultImage, customDefaultCtaUrl, {
+          onFill: (activeCampaign) => {
+            const { asset_url, cta_url } = activeCampaign.Ads[0];
+            new THREE.TextureLoader().load(asset_url, tex => {
+              setMaterial(new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+            });
+            setBannerData({ image: asset_url, url: cta_url, campaignId: activeCampaign.CampaignId });
+          }
         });
       }
     }, AD_REFRESH_INTERVAL);

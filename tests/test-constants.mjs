@@ -27,7 +27,7 @@ export async function injectIFrame(page, url, image, adUnitId) {
   }, [url, image, adUnitId]);
 }
 
-export async function checkZestyDiv(page, format) {
+export async function checkBorellionDiv(page, format) {
   let div;
   if (!format) {
     div = await page.frameLocator('#unknown').locator('#borellion-div-00000000-0000-0000-0000-000000000000');

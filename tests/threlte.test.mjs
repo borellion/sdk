@@ -72,7 +72,7 @@ test.describe('Prebid', () => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
     await injectIFrame(page, EXAMPLE_URL2, EXAMPLE_IMAGE_BILLBOARD, BILLBOARD_ID);
     await injectIFrame(page, EXAMPLE_URL3, EXAMPLE_IMAGE_MOBILE_PHONE_INTERSTITIAL, MOBILE_PHONE_INTERSTITIAL_ID);
-    await page.waitForFunction(() => window.scene.children.filter(c => c.isMesh)[0].url != null);
+    await page.waitForFunction(([v]) => window.scene.children.filter(c => c.isMesh)[0].url?.includes(v), [EXAMPLE_URL]);
     const link1 = await page.evaluate(() => window.scene.children.filter(c => c.isMesh)[0].url);
     const link2 = await page.evaluate(() => window.scene.children.filter(c => c.isMesh)[1].url);
     const link3 = await page.evaluate(() => window.scene.children.filter(c => c.isMesh)[2].url);
@@ -111,7 +111,7 @@ test.describe('Prebid', () => {
 test.describe('Modal', () => {
   test('An ad modal is created when the modal trigger event is fired', async ({ page }) => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);
-    await page.waitForFunction(() => window.scene.children.filter(c => c.isMesh)[0].material.map?.source.data.currentSrc != null);
+    await page.waitForFunction(([v]) => window.scene.children.filter(c => c.isMesh)[0].material.map?.source.data.currentSrc == v, [EXAMPLE_IMAGE_MEDIUM_RECTANGLE]);
     await page.evaluate(() => {
       let event = new CustomEvent('lose');
       document.dispatchEvent(event);

@@ -1,4 +1,4 @@
-export function fetchCampaignAd(adUnitId: any, format?: string, style?: string): Promise<any>;
+export function fetchCampaignAd(adUnitId: string, format?: string, style?: string, prebid?: boolean, customDefaultImage?: string | null, customDefaultCtaUrl?: string | null, callbacks?: { onDefault?: (campaign: any) => void, onFill?: (campaign: any) => void }): void;
 /**
  * Increment the on-load event count for the ad unit
  * @param {string} adUnitId The ad unit ID

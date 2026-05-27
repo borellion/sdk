@@ -43,16 +43,24 @@ export default class Borellion extends Mesh {
     this.modalBackground = config.modalBackground ?? false;
     this.modalDelay = config.modalDelay ?? 0;
     this.banner = {};
+    this.material = new MeshBasicMaterial({ transparent: true });
 
-    this.bannerPromise = loadBanner(adUnit, format, style, this.prebid, this.customDefaultImage, this.customDefaultCtaUrl, this.modalTrigger, this.modalBackground, this.modalDelay).then(banner => {
-      this.material = new MeshBasicMaterial({
-        map: banner.texture
+    const applyTexture = (campaign) => {
+      const { asset_url: image, cta_url: url } = campaign.Ads[0];
+      this.banner.src = image;
+      this.banner.url = url;
+      this.banner.campaignId = campaign.CampaignId;
+      new TextureLoader().load(image, (texture) => {
+        this.material.map = texture;
+        this.material.needsUpdate = true;
       });
-      this.material.transparent = true;
-      this.banner = banner;
+    };
 
-      if (beacon) {
-        sendOnLoadMetric(adUnit, banner.campaignId);
+    fetchCampaignAd(adUnit, format, style, this.prebid, this.customDefaultImage, this.customDefaultCtaUrl, {
+      onDefault: applyTexture,
+      onFill: (campaign) => {
+        applyTexture(campaign);
+        if (beacon) sendOnLoadMetric(adUnit, campaign.CampaignId);
       }
     });
     this.onClick = this.onClick.bind(this);
@@ -103,44 +111,21 @@ export default class Borellion extends Mesh {
       camera.matrixWorld.toArray(),
     );
     if (isVisible) {
-      loadBanner(this.adUnit, this.format, this.style, this.prebid, this.customDefaultImage, this.customDefaultCtaUrl).then(banner => {
-        this.material.map = banner.texture;
-        this.material.needsUpdate = true;
-        this.banner = banner;
+      fetchCampaignAd(this.adUnit, this.format, this.style, this.prebid, this.customDefaultImage, this.customDefaultCtaUrl, {
+        onFill: (campaign) => {
+          const { asset_url: image, cta_url: url } = campaign.Ads[0];
+          this.banner.src = image;
+          this.banner.url = url;
+          this.banner.campaignId = campaign.CampaignId;
+          new TextureLoader().load(image, (texture) => {
+            this.material.map = texture;
+            this.material.needsUpdate = true;
+          });
+        }
       });
     }
   }
 }
 
-async function loadBanner(adUnit, format, style, prebid = true, customDefaultImage = null, customDefaultCtaUrl = null, modalTrigger = null, modalBackground = false, modalDelay = 0) {
-  const activeBanner = await fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl);
-
-  const { asset_url: image, cta_url: url } = activeBanner.Ads[0];
-
-  // Hook up modal trigger
-  const onModalTrigger = () => {
-    let modal = constructAdModal(adUnit, activeBanner.CampaignId, format, image, url, modalBackground, modalDelay);
-    document.body.appendChild(modal);
-  };
-  document.removeEventListener(modalTrigger, onModalTrigger);
-  document.addEventListener(modalTrigger, onModalTrigger);
-
-  return new Promise((resolve, reject) => {
-    const loader = new TextureLoader();
-
-    loader.load(
-      image,
-      function(texture) {
-        texture.needsUpdate = true;
-        resolve({ texture: texture, src: image, uri: activeBanner.uri, url: url, campaignId: activeBanner.CampaignId });
-      },
-      undefined,
-      function(err) {
-        console.error('An error occurred while loading the ad.');
-        reject(err);
-      }
-    );
-  });
-}
 
 window.Borellion = Borellion;
