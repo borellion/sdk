@@ -32,40 +32,31 @@ class Borellion extends HTMLElement {
 
     this.adjustHeightandWidth();
 
-    async function loadBanner(adUnit, format, shadow, width, height, beacon, prebid) {
-      const activeCampaign = await fetchCampaignAd(adUnit, format, 'standard', prebid);
-
-      const { id, asset_url: image, cta_url: url } = activeCampaign.Ads[0];
-
+    function loadBanner(adUnit, format, shadow, width, height, beacon, prebid) {
       const img = document.createElement('img');
       shadow.innerHTML = '';
       shadow.appendChild(img);
-      img.setAttribute('id', id);
       img.style.width = width;
       img.style.height = height;
       img.setAttribute('crossorigin', '');
-      img.setAttribute('data-url', url);
-      img.addEventListener('click', (e) => {
-        e.preventDefault();
-        openURL(url);
-        if (beacon) {
-          sendOnClickMetric(adUnit, activeCampaign.CampaignId);
+
+      fetchCampaignAd(adUnit, format, 'standard', prebid, null, null, {
+        onDefault: ({ Ads: [{ asset_url }] }) => {
+          img.setAttribute('src', asset_url);
+        },
+        onFill: (activeCampaign) => {
+          const { id, asset_url: image, cta_url: url } = activeCampaign.Ads[0];
+          img.setAttribute('id', id);
+          img.setAttribute('data-url', url);
+          img.addEventListener('click', (e) => {
+            e.preventDefault();
+            openURL(url);
+            if (beacon) sendOnClickMetric(adUnit, activeCampaign.CampaignId);
+          });
+          if (beacon) sendOnLoadMetric(adUnit, activeCampaign.CampaignId);
+          if (image) img.setAttribute('src', image);
         }
       });
-
-      if (beacon) {
-        sendOnLoadMetric(adUnit, activeCampaign.CampaignId);
-      }
-
-      if (image) {
-        img.setAttribute('src', image);
-        return new Promise((resolve, reject) => {
-          img.onload = () => resolve({ img, url });
-          img.onerror = () => reject(new Error('img load error'));
-        });
-      } else {
-        return { id: 'blank' };
-      }
     }
 
     loadBanner(

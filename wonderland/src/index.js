@@ -165,87 +165,142 @@ export class Borellion extends Component {
       this.canvas = null;
     }
 
-    this.loadBanner(
+    const fetchFn = this.dynamicNetworking && this.dynamicNetworkFunctions?.fetchCampaignAd
+      ? this.dynamicNetworkFunctions.fetchCampaignAd.bind(this.dynamicNetworkFunctions)
+      : fetchCampaignAd;
+
+    fetchFn(
       this.adUnit,
       this.formatKeys[this.format],
       this.styleKeys[this.style],
+      this.prebid,
       this.customDefaultImage,
       this.customDefaultCtaUrl,
-      this.modalTrigger,
-      this.modalBackground,
-      this.modalDelay
-    ).then(banner => {
-      this.banner = banner;
-      if (this.scaleToRatio) {
-        /* Make banner always 1 meter height, adjust width according to banner aspect ratio */
-        this.height = this.object.getScalingLocal()[1];
-        this.width = this.formats[this.format].width * this.height;
+      {
+        onDefault: (campaign) => {
+          if (!this.banner) {
+            const { asset_url: image } = campaign.Ads[0];
+            if (image) {
+              this.engine.textures.load(image, '').then(texture => {
+                const m = this.mesh.material.clone();
+                if (m.diffuseTexture || (m.hasParameter && m.hasParameter('diffuseTexture'))) {
+                  m.diffuseTexture = texture;
+                } else if (m.flatTexture || (m.hasParameter && m.hasParameter('flatTexture'))) {
+                  m.flatTexture = texture;
+                }
+                this.mesh.material = m;
+              });
+            }
+          }
+        },
+        onFill: (activeCampaign) => {
+          const { asset_url: image, cta_url: url } = activeCampaign.Ads[0];
 
-        this.object.resetScaling();
-        if (this.createAutomaticCollision) {
-          this.collision.extents = [
-            this.width,
-            this.height,
-            0.1
-          ];
-        }
-        this.object.scaleLocal([this.width, this.height, 1.0]);
-      }
-      const m = this.mesh.material.clone();
-      if (this.textureProperty === 'auto') {
-        if (m.diffuseTexture || (m.hasParameter && m.hasParameter('diffuseTexture'))) {
-          if (banner.imageSrc.includes('canvas://')) {
-            this.canvasLoaded = false;
-            this.canvasTexturePipeline = 'diffuse';
-          } else if (banner.imageSrc.includes('.gif')) {
-            this.canvas = document.createElement('canvas');
-            this.canvas.id = 'borellionCanvas';
-            document.body.appendChild(this.canvas);
-            gifler(banner.imageSrc).animate('#borellionCanvas');
-            this.canvasLoaded = false;
-            this.canvasTexturePipeline = 'diffuse';
-          } else {
-            m.diffuseTexture = banner.texture;
-            m.alphaMaskThreshold = 0.3;
+          // Free old banner images from the texture atlas
+          if (this.mesh.material?.flatTexture != null) {
+            this.mesh.material.flatTexture.destroy();
+          } else if (this.mesh.material?.diffuseTexture != null) {
+            this.mesh.material.diffuseTexture.destroy();
           }
-        } else if (m.flatTexture || (m.hasParameter && m.hasParameter('flatTexture'))) {
-          if (banner.imageSrc.includes('canvas://')) {
-            const canvas = document.createElement('canvas');
-            canvas.id = 'borellionCanvas';
-            canvas.width = this.canvas.width;
-            canvas.height = this.canvas.height;
-            document.body.appendChild(canvas);
-            this.canvasLoaded = false;
-            this.canvasTexturePipeline = 'flat';
-          } else if (banner.imageSrc.includes('.gif')) {
-            this.canvas = document.createElement('canvas');
-            this.canvas.id = 'borellionCanvas';
-            document.body.appendChild(this.canvas);
-            gifler(banner.imageSrc).animate('#borellionCanvas');
-            this.canvasLoaded = false;
-            this.canvasTexturePipeline = 'flat';
-          } else {
-            m.flatTexture = banner.texture;
-            m.alphaMaskThreshold = 0.8;
+
+          // Hook up modal trigger
+          if (this.modalTrigger) {
+            if (modalTriggers[this.adUnit]) {
+              document.removeEventListener(this.modalTrigger, modalTriggers[this.adUnit]);
+            }
+            modalTriggers[this.adUnit] = () => {
+              let modal = constructAdModal(this.adUnit, activeCampaign.CampaignId, this.formatKeys[this.format], image, url, this.modalBackground, this.modalDelay);
+              document.body.appendChild(modal);
+            };
+            document.addEventListener(this.modalTrigger, modalTriggers[this.adUnit]);
           }
-        } else {
-          throw Error(
-            "'borellion' unable to apply banner texture: unsupported pipeline"
-          );
+
+          const applyBanner = (banner) => {
+            this.banner = banner;
+            if (this.scaleToRatio) {
+              /* Make banner always 1 meter height, adjust width according to banner aspect ratio */
+              this.height = this.object.getScalingLocal()[1];
+              this.width = this.formats[this.format].width * this.height;
+
+              this.object.resetScaling();
+              if (this.createAutomaticCollision) {
+                this.collision.extents = [
+                  this.width,
+                  this.height,
+                  0.1
+                ];
+              }
+              this.object.scaleLocal([this.width, this.height, 1.0]);
+            }
+            const m = this.mesh.material.clone();
+            if (this.textureProperty === 'auto') {
+              if (m.diffuseTexture || (m.hasParameter && m.hasParameter('diffuseTexture'))) {
+                if (banner.imageSrc.includes('canvas://')) {
+                  this.canvasLoaded = false;
+                  this.canvasTexturePipeline = 'diffuse';
+                } else if (banner.imageSrc.includes('.gif')) {
+                  this.canvas = document.createElement('canvas');
+                  this.canvas.id = 'borellionCanvas';
+                  document.body.appendChild(this.canvas);
+                  gifler(banner.imageSrc).animate('#borellionCanvas');
+                  this.canvasLoaded = false;
+                  this.canvasTexturePipeline = 'diffuse';
+                } else {
+                  m.diffuseTexture = banner.texture;
+                  m.alphaMaskThreshold = 0.3;
+                }
+              } else if (m.flatTexture || (m.hasParameter && m.hasParameter('flatTexture'))) {
+                if (banner.imageSrc.includes('canvas://')) {
+                  const canvas = document.createElement('canvas');
+                  canvas.id = 'borellionCanvas';
+                  canvas.width = this.canvas.width;
+                  canvas.height = this.canvas.height;
+                  document.body.appendChild(canvas);
+                  this.canvasLoaded = false;
+                  this.canvasTexturePipeline = 'flat';
+                } else if (banner.imageSrc.includes('.gif')) {
+                  this.canvas = document.createElement('canvas');
+                  this.canvas.id = 'borellionCanvas';
+                  document.body.appendChild(this.canvas);
+                  gifler(banner.imageSrc).animate('#borellionCanvas');
+                  this.canvasLoaded = false;
+                  this.canvasTexturePipeline = 'flat';
+                } else {
+                  m.flatTexture = banner.texture;
+                  m.alphaMaskThreshold = 0.8;
+                }
+              } else {
+                throw Error(
+                  "'borellion' unable to apply banner texture: unsupported pipeline"
+                );
+              }
+              this.mesh.material = m;
+              this.mesh.material.alphaMaskTexture = banner.texture;
+            } else {
+              this.mesh.material[this.textureProperty] = banner.texture;
+              this.mesh.material.alphaMaskTexture = banner.texture;
+            }
+            if (this.beacon && !sdkLoaded) {
+              this.dynamicNetworking && this.dynamicNetworkFunctions?.sendOnLoadMetric ?
+                this.dynamicNetworkFunctions.sendOnLoadMetric(this.adUnit, this.banner.campaignId) :
+                sendOnLoadMetric(this.adUnit, this.banner.campaignId);
+              sdkLoaded = true;
+            }
+          };
+
+          if (image.includes('canvas://')) {
+            const canvasIframe = document.querySelector('#borellion-canvas-iframe');
+            const canvas = canvasIframe.contentDocument.querySelector('canvas');
+            this.canvas = canvas;
+            applyBanner({ texture: {}, imageSrc: image, url, campaignId: activeCampaign.CampaignId });
+          } else {
+            this.engine.textures.load(image, '').then(texture => {
+              applyBanner({ texture, imageSrc: image, url, campaignId: activeCampaign.CampaignId });
+            });
+          }
         }
-        this.mesh.material = m;
-        this.mesh.material.alphaMaskTexture = banner.texture;
-      } else {
-        this.mesh.material[this.textureProperty] = banner.texture;
-        this.mesh.material.alphaMaskTexture = banner.texture;
       }
-      if (this.beacon && !sdkLoaded) {
-        this.dynamicNetworking && this.dynamicNetworkFunctions?.sendOnLoadMetric ?
-          this.dynamicNetworkFunctions.sendOnLoadMetric(this.adUnit, this.banner.campaignId) :
-          sendOnLoadMetric(this.adUnit, this.banner.campaignId);
-        sdkLoaded = true;
-      }
-    });
+    );
   }
 
   onClick() {
@@ -266,50 +321,6 @@ export class Borellion extends Component {
       this.dynamicNetworking && this.dynamicNetworkFunctions?.sendOnClickMetric ?
         this.dynamicNetworkFunctions.sendOnClickMetric(this.adUnit, this.banner.campaignId) :
         sendOnClickMetric(this.adUnit, this.banner.campaignId);
-    }
-  }
-
-  async loadBanner(adUnit, format, style, customDefaultImage, customDefaultCtaUrl, modalTrigger, modalBackground, modalDelay) {
-    const activeCampaign = this.dynamicNetworking && this.dynamicNetworkFunctions?.fetchCampaignAd ?
-      await this.dynamicNetworkFunctions.fetchCampaignAd(adUnit, format, style, this.prebid, this.customDefaultImage, this.customDefaultCtaUrl) :
-      await fetchCampaignAd(adUnit, format, style, this.prebid, customDefaultImage, customDefaultCtaUrl);
-
-    const { asset_url: image, cta_url: url } = activeCampaign.Ads[0];
-    this.campaignId = activeCampaign.CampaignId;
-
-    // Free old banner images from the texture atlas, otherwise refreshes will eventually fill it
-    // and no further images will be able to load
-    if (this.mesh.material?.flatTexture != null) {
-      this.mesh.material.flatTexture.destroy();
-    } else if (this.mesh.material?.diffuseTexture != null) {
-      this.mesh.material.diffuseTexture.destroy();
-    }
-
-    // Hook up modal trigger
-    if (modalTrigger) {
-      // Remove old listener if it exists
-      if (modalTriggers[adUnit]) {
-        document.removeEventListener(modalTrigger, modalTriggers[adUnit]);
-      }
-
-      // Create and store new handler
-      modalTriggers[adUnit] = () => {
-        let modal = constructAdModal(adUnit, this.campaignId, format, image, url, modalBackground, modalDelay);
-        document.body.appendChild(modal);
-      };
-
-      document.addEventListener(modalTrigger, modalTriggers[adUnit]);
-    }
-
-    if (image.includes('canvas://')) {
-      const canvasIframe = document.querySelector('#borellion-canvas-iframe');
-      const canvas = canvasIframe.contentDocument.querySelector('canvas')
-      this.canvas = canvas;
-      return { texture: {}, imageSrc: image, url, campaignId: activeCampaign.CampaignId };
-    } else {
-      return this.engine.textures.load(image, '').then(texture => {
-        return { texture, imageSrc: image, url, campaignId: activeCampaign.CampaignId };
-      });
     }
   }
 

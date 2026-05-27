@@ -117,7 +117,7 @@ AFRAME.registerComponent('borellion', {
   }
 });
 
-async function createBanner(el, adUnit, format, style, height, beacon, prebid = true, customDefaultImage = '', customDefaultCtaUrl = '', modalTrigger = '', modalBackground = false, modalDelay = 0) {
+function createBanner(el, adUnit, format, style, height, beacon, prebid = true, customDefaultImage = '', customDefaultCtaUrl = '', modalTrigger = '', modalBackground = false, modalDelay = 0) {
   let overrideEntry = getOverrideUnitInfo(adUnit);
   let shouldOverride = overrideEntry?.format && format !== overrideEntry.format;
   const adjustedFormat = shouldOverride ? overrideEntry.format : format;
@@ -157,45 +157,36 @@ async function createBanner(el, adUnit, format, style, height, beacon, prebid = 
       if (!visibilityCheck([min.x, min.y, min.z], [max.x, max.y, max.z], camera.projectionMatrix.toArray(), camera.matrixWorld.toArray())) return;
     }
 
-    const bannerPromise = loadBanner(adUnit, format, style, beacon, prebid, customDefaultImage, customDefaultCtaUrl).then(banner => {
-      if (banner.img && typeof banner.img != 'string') {
-        assets.appendChild(banner.img);
-      }
-      return banner;
-    });
+    fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl, {
+      onFill: (activeCampaign) => {
+        const { asset_url: image, cta_url: url } = activeCampaign.Ads[0];
+        if (!image) return;
 
-    bannerPromise.then(banner => updateBanner(banner, plane, el, adUnit, adjustedFormat, style, adjustedHeight, beacon, modalTrigger, modalBackground, modalDelay));
+        const img = document.createElement('img');
+        img.setAttribute('id', adUnit + Math.random());
+        img.setAttribute('crossorigin', '');
+
+        const applyBanner = (banner) => {
+          if (banner.img && typeof banner.img != 'string') {
+            assets.appendChild(banner.img);
+          }
+          updateBanner(banner, plane, el, adUnit, adjustedFormat, style, adjustedHeight, beacon, modalTrigger, modalBackground, modalDelay);
+        };
+
+        if (image.includes('canvas://')) {
+          applyBanner({ img: { src: image }, uri: adUnit, url, campaignId: activeCampaign.CampaignId });
+        } else {
+          img.setAttribute('src', image);
+          img.onload = () => applyBanner({ img, uri: adUnit, url, campaignId: activeCampaign.CampaignId });
+        }
+      }
+    });
   }
 
   getBanner();
   setInterval(getBanner, AD_REFRESH_INTERVAL);
 }
 
-async function loadBanner(adUnit, format, style, beacon, prebid = true, customDefaultImage = '', customDefaultCtaUrl = '') {
-  const activeCampaign = await fetchCampaignAd(adUnit, format, style, prebid, customDefaultImage, customDefaultCtaUrl);
-
-  const { asset_url: image, cta_url: url } = activeCampaign.Ads[0];
-
-  const img = document.createElement('img');
-  img.setAttribute('id', adUnit + Math.random());
-  img.setAttribute('crossorigin', '');
-  if (image) {
-    if (image.includes('canvas://')) {
-      return new Promise(resolve => {
-        resolve({ img: { src: image }, uri: adUnit, url: url, campaignId: activeCampaign.CampaignId });
-      });
-
-    } else {
-      img.setAttribute('src', image);
-      return new Promise((resolve, reject) => {
-        img.onload = () => resolve({ img: img, uri: adUnit, url: url, campaignId: activeCampaign.CampaignId });
-        img.onerror = () => reject(new Error('img load error'));
-      });
-    }
-  } else {
-    return { id: 'blank' };
-  }
-}
 
 async function updateBanner(banner, plane, el, adUnit, format, style, height, beacon, modalTrigger, modalBackground, modalDelay) {
   let overrideEntry = getOverrideUnitInfo(adUnit);
