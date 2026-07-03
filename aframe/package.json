@@ -1,6 +1,6 @@
 {
   "name": "@borellion/aframe-sdk",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "This is the A-Frame SDK for Borellion Banner integration.",
   "main": "dist/borellion-aframe-sdk.js",
   "files": [

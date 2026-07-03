@@ -1,6 +1,6 @@
 {
   "name": "@borellion/babylonjs-sdk",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "This is the babylon.js SDK for Borellion Banner integration.",
   "main": "dist/borellion-babylonjs-sdk.js",
   "files": [
