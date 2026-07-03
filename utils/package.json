@@ -12,7 +12,7 @@
   "author": "Borellion",
   "license": "ISC",
   "dependencies": {
-    "@borellion/beacon": "latest",
+    "@borellion/beacon": "0.0.21",
     "three": "^0.166.1",
     "uuid": "^8.3.2"
   },
