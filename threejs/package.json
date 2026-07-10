@@ -1,6 +1,6 @@
 {
   "name": "@borellion/threejs-sdk",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "This is the three.js SDK for Borellion Banner integration.",
   "main": "dist/borellion-threejs-sdk.js",
   "files": [
