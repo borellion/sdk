@@ -119,6 +119,46 @@ test.describe('Prebid @skip', () => {
   });
 });
 
+test.describe('Beacon reliability @skip', () => {
+  // Regression test for a bug where sendOnLoadMetric only fired from inside
+  // the texture-load success path. A blocked/broken/CORS-failing creative
+  // image meant the promise never resolved (and had no .catch()), so the
+  // "visits" beacon silently and permanently never fired for that ad unit -
+  // even though a real ad had already been served. See: Boulderworld
+  // (dmnshd.gg) integration, which served real paid campaigns for 8 days
+  // while beacon2.zesty.market recorded zero visits/clicks the whole time.
+  test('sendOnLoadMetric still fires when the banner creative image fails to load', async ({ page }) => {
+    const incrementCalls = [];
+    await page.route('**/zgraphql', async (route) => {
+      const postData = route.request().postData() || '';
+      if (postData.includes('mutation { increment')) {
+        incrementCalls.push(postData);
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: '{"data":{"increment":{"message":"ok"}}}',
+      });
+    });
+
+    // Serve a creative pointing at an image URL that will 404, simulating a
+    // blocked/broken/CORS-failing ad image - the real-world failure mode
+    // that triggered this bug.
+    await injectIFrame(page, EXAMPLE_URL, 'http://localhost:8080/tests/res/does-not-exist.jpg', MEDIUM_RECTANGLE_ID);
+
+    // Give the (failing) texture load time to reject and settle.
+    await page.waitForTimeout(5000);
+
+    // Sanity check: this is genuinely exercising the failure path - the
+    // banner should never have successfully applied a texture.
+    const banner = await page.evaluate(() => window.testBanners[0].banner);
+    expect(banner).toBeFalsy();
+
+    // The actual regression check: the impression must still be recorded.
+    expect(incrementCalls.some(c => c.includes('eventType: visits'))).toBe(true);
+  });
+});
+
 test.describe('Modal @skip', () => {
   test('An ad modal is created when the modal trigger event is fired', async ({ page }) => {
     await injectIFrame(page, EXAMPLE_URL, EXAMPLE_IMAGE_MEDIUM_RECTANGLE, MEDIUM_RECTANGLE_ID);

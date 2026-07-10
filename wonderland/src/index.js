@@ -196,6 +196,17 @@ export class Borellion extends Component {
         onFill: (activeCampaign) => {
           const { asset_url: image, cta_url: url } = activeCampaign.Ads[0];
 
+          // Record the impression as soon as an ad has been served, rather than
+          // gating it behind texture load succeeding: a blocked/broken image
+          // shouldn't silently and permanently prevent this ad unit from ever
+          // reporting a visit again (sdkLoaded is set once, module-wide).
+          if (this.beacon && !sdkLoaded) {
+            this.dynamicNetworking && this.dynamicNetworkFunctions?.sendOnLoadMetric ?
+              this.dynamicNetworkFunctions.sendOnLoadMetric(this.adUnit, activeCampaign.CampaignId) :
+              sendOnLoadMetric(this.adUnit, activeCampaign.CampaignId);
+            sdkLoaded = true;
+          }
+
           // Free old banner images from the texture atlas
           if (this.mesh.material?.flatTexture != null) {
             this.mesh.material.flatTexture.destroy();
@@ -280,12 +291,6 @@ export class Borellion extends Component {
               this.mesh.material[this.textureProperty] = banner.texture;
               this.mesh.material.alphaMaskTexture = banner.texture;
             }
-            if (this.beacon && !sdkLoaded) {
-              this.dynamicNetworking && this.dynamicNetworkFunctions?.sendOnLoadMetric ?
-                this.dynamicNetworkFunctions.sendOnLoadMetric(this.adUnit, this.banner.campaignId) :
-                sendOnLoadMetric(this.adUnit, this.banner.campaignId);
-              sdkLoaded = true;
-            }
           };
 
           if (image.includes('canvas://')) {
@@ -296,6 +301,8 @@ export class Borellion extends Component {
           } else {
             this.engine.textures.load(image, '').then(texture => {
               applyBanner({ texture, imageSrc: image, url, campaignId: activeCampaign.CampaignId });
+            }).catch(err => {
+              console.error("'borellion' failed to load banner texture:", err);
             });
           }
         }

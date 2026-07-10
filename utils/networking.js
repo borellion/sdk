@@ -25,9 +25,16 @@ const intervals = {};
 let divCount = 0;
 
 // Instantiate the beacon prototype as an import side-effect for now
-// just so we don't need to modify all the other SDKs
-const beacon = new Beacon('https://relay.borellion.com');
-beacon.signal();
+// just so we don't need to modify all the other SDKs.
+// Guarded because this module gets bundled twice in some SDKs (e.g. the
+// Wonderland SDK's dynamicNetworking option dynamically re-imports a
+// separately-published copy of this same file) -- without this check that
+// would construct and signal a second, redundant Beacon on the same page.
+if (typeof window !== 'undefined' && !window.__borellionNetworkingBeaconInit) {
+  window.__borellionNetworkingBeaconInit = true;
+  const beacon = new Beacon('https://relay.borellion.com');
+  beacon.signal();
+}
 
 // Check if the Zesty debug param is present
 const Params = URLSearchParams ? URLSearchParams : Map; // Shadowing with Map in case unavailable
